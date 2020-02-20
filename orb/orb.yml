@@ -135,5 +135,9 @@ commands:
             envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE_var.yml
             mv ./$DEPLOYMENT_TYPE_var.yml ./$DEPLOYMENT_TYPE.yml
 
-            kubectl kustomize . > new.yml
+            # kubectl kustomize . > new.yml
+            kubectl kustomize . | \
+              yq w --doc 0 - 'spec.template.spec.containers[].volumeMounts[+].name' 'secrets' | \
+              yq w --doc 0 - 'spec.template.spec.containers[].volumeMounts(name==secrets).mountPath' '/secrets' > new.yml
+
             mv new.yml $DEPLOY_FILE
