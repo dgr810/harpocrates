@@ -42,7 +42,7 @@ func ReadInput(input string) SecretJSON {
 		os.Exit(1)
 	}
 
-	config.Config.SecretPrefix = secretJSON.Prefix
+	config.Config.Prefix = secretJSON.Prefix
 
 	return secretJSON
 }

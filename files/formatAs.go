@@ -43,8 +43,8 @@ func FormatAsENV(input map[string]interface{}) string {
 }
 
 func getPrefix() string {
-	if config.Config.SecretPrefix != "" {
-		return config.Config.SecretPrefix
+	if config.Config.Prefix != "" {
+		return config.Config.Prefix
 	}
 	return ""
 }
