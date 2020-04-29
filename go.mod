@@ -1,4 +1,4 @@
-module bitbucket.org/bestsellerit/harpocrates
+module github.com/BESTSELLER/harpocrates
 
 go 1.13
 
