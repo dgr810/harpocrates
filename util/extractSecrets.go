@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/BESTSELLER/harpocrates/files"
-
 	"github.com/BESTSELLER/harpocrates/vault"
 )
 

@@ -60,4 +60,7 @@ CircleCI steps:
 
 ## TO-DO
 
-* Support files ?
+* harpocrates --format=env --dirPath=/tmp/secrets.env --prefix=K8S_CLUSTER_ --secret=ES/data/someSecret
+* harpocrates --format=env --dirPath=/tmp/secrets.env --secrets=ES/data/someSecret:DOCKER_,ES/data/something:K8S_CLUSTER_
+* harpocrates --json '{}'
+* harpocrates --file /path/to/yaml
