@@ -2,7 +2,7 @@ version: 2.1
 executors:
   go_image:
     docker:
-      - image: circleci/golang:1.14.2
+      - image: circleci/golang:1.14.1
 
 orbs:
   secret-injector: bestsellerit/secret-injector@0.2.27
@@ -182,7 +182,7 @@ workflows:
     jobs:
       - secret-injector/dump-secrets:
           vault-path: ES/service_accounts/harbor/harpocrates-ci
-          context: es02-prod
+          # context: es03-prod
       - test
       - test-sonar:
           # context: es03-prod
@@ -194,7 +194,7 @@ workflows:
     jobs:
       - secret-injector/dump-secrets:
           vault-path: ES/service_accounts/harbor/harpocrates-ci
-          context: es02-prod
+          # context: es03-prod
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
@@ -207,7 +207,7 @@ workflows:
               branches:
                 ignore: /.*/
       - test-sonar:
-          context: es02-prod
+          # context: es03-prod
           requires:
             - test
             - secret-injector/dump-secrets
@@ -217,7 +217,7 @@ workflows:
             branches:
               ignore: /.*/
       - build-go:
-          context: es02-prod
+          # context: es03-prod
           requires:
             - test-sonar
           filters:
@@ -226,7 +226,7 @@ workflows:
             branches:
               ignore: /.*/
       - build-docker:
-          context: es02-prod
+          # context: es03-prod
           requires:
             - build-go
           filters:
@@ -235,7 +235,7 @@ workflows:
             branches:
               ignore: /.*/
       - publish:
-          context: es02-prod
+          # context: es03-prod
           requires:
             - build-docker
           filters:
