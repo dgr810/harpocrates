@@ -7,6 +7,12 @@ import (
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/spf13/cobra"
+	"gopkg.in/gookit/color.v1"
+)
+
+const (
+	NOT_REQUIRED = false
+	REQUIRED     = true
 )
 
 var (
@@ -16,86 +22,94 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "harpocrates",
 		Short: "A generator for Cobra based Applications",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Echo: " + strings.Join(args, " "))
-			fmt.Printf("%+v\n", config.Config)
+			// fmt.Println("filePath", filePath)
+			verifyStuff(cmd)
 		},
 	}
 )
+
+func verifyStuff(cmd *cobra.Command) {
+	verifySecretInput(cmd)
+	verifyToken(cmd)
+}
+
+func verifyToken(cmd *cobra.Command) {
+	if config.Config.TokenPath == "" && config.Config.VaultToken == "" {
+		color.Red.Println("You need to specify either [--vault_token] or [--token_path]")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	if config.Config.TokenPath != "" && config.Config.VaultToken != "" {
+		color.Red.Println("You can't use [--vault_token] and [--token_path] at the same time")
+		cmd.Usage()
+		os.Exit(1)
+	}
+}
+
+func verifySecretInput(cmd *cobra.Command) {
+	if filePath == "" && config.Config.SecretJSON == "" {
+		color.Red.Println("You need to specify either [--file] or [--json]")
+		cmd.Usage()
+		os.Exit(1)
+	}
+
+	if filePath != "" && config.Config.SecretJSON != "" {
+		color.Red.Println("You can't use [--file] and [--json] at the same time")
+		cmd.Usage()
+		os.Exit(1)
+	}
+}
 
 // Execute executes the root command.
 func Execute() error {
 	return rootCmd.Execute()
 }
 
-var VaultAddress string
-var ClusterName string
-var TokenPath string
-var Prefix string
-var VaultToken string
-var Secrets string
+var filePath string
 
 func init() {
-	config.LoadConfig()
+	rootCmd.PersistentFlags().StringVar(&config.Config.VaultAddress, "vault_address", "", "Address of you Hashicorp Vault. E.g. https://127:0.0.1")
+	rootCmd.PersistentFlags().StringVar(&config.Config.ClusterName, "cluster_name", "", "Used to login to Vault. We should really find a better way than this.")
+	rootCmd.PersistentFlags().StringVar(&config.Config.TokenPath, "token_path", "", "Path to where your JWT token is located.")
+	rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "vault_token", "", "If you already have a Vault token, you can specify it here.")
+	rootCmd.PersistentFlags().StringVar(&config.Config.Prefix, "prefix", "", "Prefix of your secret keys. E.g. if you specify 'FOO_' as the prefix and you have a secret called 'BAR' then it will be outputted as 'FOO_BAR'.")
+	rootCmd.PersistentFlags().StringVar(&config.Config.SecretJSON, "json", "", "Some json/yaml can be inserted here.")
+	rootCmd.PersistentFlags().StringVarP(&filePath, "file", "f", "", "Path to your yaml file containing which secrets you wanna fetch.")
 
-	rootCmd.MarkPersistentFlagRequired("format")
-	rootCmd.MarkPersistentFlagRequired("dirPath")
-	rootCmd.MarkPersistentFlagRequired("prefix")
-	rootCmd.MarkPersistentFlagRequired("secret")
-	// rootCmd.MarkPersistentFlagRequired("")
-	// rootCmd.MarkPersistentFlagRequired("")
-	// rootCmd.MarkPersistentFlagRequired("")
-
-	rootCmd.PersistentFlags().StringVarP(&VaultAddress, "vault_address", "a", "", "name of license for the project")
-	rootCmd.PersistentFlags().StringVarP(&ClusterName, "cluster_name", "b", "", "name of license for the project")
-	rootCmd.PersistentFlags().StringVarP(&TokenPath, "token_path", "c", "", "name of license for the project")
-	rootCmd.PersistentFlags().StringVarP(&Prefix, "prefix", "d", "", "name of license for the project")
-	rootCmd.PersistentFlags().StringVarP(&VaultToken, "vault_token", "e", "", "name of license for the project")
-	rootCmd.PersistentFlags().StringVarP(&Secrets, "secrets", "f", "", "name of license for the project")
-
-	setConfigFromFlags()
-	checkRequiredFlags()
-	// * harpocrates --format env --dirPath /tmp/secrets.env --prefix K8S_CLUSTER_ 'ES/data/someSecret'
-	// * harpocrates --format env --dirPath /tmp/secrets.env 'ES/data/someSecret:DOCKER_,ES/data/something:K8S_CLUSTER_'
-	// * harpocrates '{}'
-	// * harpocrates --file /path/to/[yaml or json]
+	syncEnvToFlags()
 }
 
-func setConfigFromFlags() {
-	if VaultAddress != "" {
-		config.Config.VaultAddress = VaultAddress
-	}
-	if ClusterName != "" {
-		config.Config.ClusterName = ClusterName
-	}
-	if TokenPath != "" {
-		config.Config.TokenPath = TokenPath
-	}
-	if VaultToken != "" {
-		config.Config.VaultToken = VaultToken
-	}
-}
-
-func checkRequiredFlags() {
-	fmt.Println("checking...")
-	fmt.Printf("%+v\n", &config.Config)
-
-	var missing []string
-
+// We should be able to do this better!
+func syncEnvToFlags() {
 	if config.Config.VaultAddress == "" {
-		missing = append(missing, "vault_address")
+		tryEnv("vault_address", &config.Config.VaultAddress, REQUIRED)
 	}
 	if config.Config.ClusterName == "" {
-		missing = append(missing, "cluster_name")
+		tryEnv("cluster_name", &config.Config.ClusterName, REQUIRED)
 	}
 	if config.Config.TokenPath == "" {
-		missing = append(missing, "token_path")
+		tryEnv("token_path", &config.Config.TokenPath, REQUIRED)
+	}
+	if config.Config.Prefix == "" {
+		tryEnv("prefix", &config.Config.Prefix, NOT_REQUIRED)
 	}
 	if config.Config.VaultToken == "" {
-		missing = append(missing, "vault_token")
+		tryEnv("vault_token", &config.Config.VaultToken, REQUIRED)
 	}
+}
 
-	fmt.Printf("The following config(s) are missing:\n%s\n", strings.Join(missing, ","))
-	os.Exit(1)
+func tryEnv(env string, some *string, required bool) {
+	envPrefix := "harpocrates"
+
+	envVar, ok := os.LookupEnv(strings.ToUpper(fmt.Sprintf("%s_%s", envPrefix, env)))
+	if ok == true && envVar != "" {
+		*some = envVar
+	} else {
+		if required {
+			rootCmd.MarkPersistentFlagRequired(env)
+		}
+	}
 }

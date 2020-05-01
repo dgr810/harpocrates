@@ -1,5 +1,4 @@
 # Harpocrates
-
 This will be the home of the master of all secrets.
 
 
@@ -57,9 +56,14 @@ CircleCI steps:
     secretFile: alfeios-db-secrets.yml
 ```
 
+## How to run locally
+```bash
+export
+```
+
 
 ## TO-DO
-
+* Do something about the JWT/Vault token stuff
 * harpocrates --format=env --dirPath=/tmp/secrets.env --prefix=K8S_CLUSTER_ --secret=ES/data/someSecret
 * harpocrates --format=env --dirPath=/tmp/secrets.env --secrets=ES/data/someSecret:DOCKER_,ES/data/something:K8S_CLUSTER_
 * harpocrates --json '{}'
