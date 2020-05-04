@@ -20,7 +20,25 @@ secrets:
 At the moment it takes a json file as input, you can convert your secret to json by doing:
 `yq read secret.yml -j`
 
-Orb should read kustomize yaml from Vault
+## How to use
+You set the following flags using environment variables:
+
+| Flag          | Environment variable       |
+| ------------- | -------------------------- |
+| vault_address | HARPOCRATES_VAULT_ADDRESS  |
+| cluster_name  | HARPOCRATES_CLUSTER_NAME   |
+| token_path    | HARPOCRATES_TOKEN_PATH     |
+| vault_token   | HARPOCRATES_VAULT_TOKEN    |
+| prefix        | HARPOCRATES_ PREFIX        |
+
+
+```bash
+harpocrates \
+  --cluster_name="cluster01-dev" \
+  --token_path="./cluster01-dev.token" \
+  --vault_address="http://127.0.0.1:8200" \
+  --file="./secret.yml"
+```
 
 
 ## Deployment.yml
@@ -63,8 +81,8 @@ export
 
 
 ## TO-DO
-* Do something about the JWT/Vault token stuff
-* harpocrates --format=env --dirPath=/tmp/secrets.env --prefix=K8S_CLUSTER_ --secret=ES/data/someSecret
-* harpocrates --format=env --dirPath=/tmp/secrets.env --secrets=ES/data/someSecret:DOCKER_,ES/data/something:K8S_CLUSTER_
-* harpocrates --json '{}'
-* harpocrates --file /path/to/yaml
+- [X] harpocrates --inline '{}'
+- [X] harpocrates --file /path/to/yaml
+- [ ] harpocrates --format=env --dirPath=/tmp/secrets.env --prefix=K8S_CLUSTER_ --secret=ES/data/someSecret
+- [ ] harpocrates --format=env --dirPath=/tmp/secrets.env --secrets=ES/data/someSecret:DOCKER_,ES/data/something:K8S_CLUSTER_
+- [ ] Should we support more login option?

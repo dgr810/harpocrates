@@ -142,14 +142,14 @@ jobs:
       - run:
           name: Update stuff with git tag
           command: |
-            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/CronJob.yml
-            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/Deployment.yml
-            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/orb.yml
-            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/StatefulSet.yml
-            cp orb/CronJob.yml ./releases
-            cp orb/Deployment.yml ./releases
-            cp orb/StatefulSet.yml ./releases
-            cp orb/kustomization.yml ./releases
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" .orb/CronJob.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" .orb/Deployment.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" .orb/orb.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" .orb/StatefulSet.yml
+            cp .orb/CronJob.yml ./releases
+            cp .orb/Deployment.yml ./releases
+            cp .orb/StatefulSet.yml ./releases
+            cp .orb/kustomization.yml ./releases
       - run:
           name: Download ghr
           command: |
@@ -170,7 +170,7 @@ jobs:
 
             export CIRCLECI_CLI_TOKEN=$(vault kv get -field=circleci_token ES/harpocrates)
             CC_NAMESPACE=bestsellerit
-            ORB_PATH=./orb/orb.yml
+            ORB_PATH=./.orb/orb.yml
             ORB_NAME=secret-injector
             
             ./cli/circleci orb validate $ORB_PATH

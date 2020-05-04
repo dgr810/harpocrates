@@ -36,6 +36,12 @@ jobs:
           command: |
             apk --no-cache add --upgrade jq
       - run:
+          name: Download Harpocrates
+          command: |
+            curl -s -H "Accept:application/vnd.github.v3.raw" -o harpocrates.tar.gz -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/harpocrates_$HARPOCRATES_VERSION\_linux_amd64.tar.gz
+            tar -xvf harpocrates.tar.gz
+            mv ./harpocrates /usr/bin/.
+      - run:
           name: Secret-injector - Write secrets to file
           command: |
             mkdir -p << parameters.workspace-path >>
@@ -60,7 +66,7 @@ jobs:
                 vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(.key):  (.value)}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.secret
               fi
             fi
-
+            
             vault kv get -format=json $VAULT_COMMON_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
             vault kv get -format=json $VAULT_CLUSTER_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
             vault kv get -format=json $VAULT_CONTEXT_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
