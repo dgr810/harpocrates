@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -55,8 +56,14 @@ func verifyStuff(cmd *cobra.Command) {
 
 func verifySecretInput(cmd *cobra.Command) {
 	if len(someSecret.Secrets) > 0 {
-		fmt.Println("LOTS of secrets !")
-		fmt.Println(someSecret.Secrets)
+
+		if someSecret.Prefix != "" {
+			config.Config.Prefix = someSecret.Prefix
+		}
+
+		b, _ := json.Marshal(someSecret)
+		config.Config.Input = string(b)
+
 		return
 	} else {
 		fmt.Println("no secrets")

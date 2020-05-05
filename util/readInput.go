@@ -25,13 +25,19 @@ func (e *SecretJSON) String() string {
 	}
 	aa := strings.Join(paramSlice, "_")
 
-	fmt.Printf("%v", e.Secrets)
-
 	return aa
 }
 
 func (e *SecretJSON) Set(value string) error {
-	e.Secrets = append(e.Secrets, []interface{}{value})
+	split := strings.Split(value, ",")
+
+	b := make([]interface{}, len(split))
+	for i := range split {
+		b[i] = split[i]
+	}
+
+	e.Secrets = b
+
 	return nil
 }
 
@@ -72,7 +78,9 @@ MoveOn:
 		os.Exit(1)
 	}
 
-	config.Config.Prefix = secretJSON.Prefix
+	if secretJSON.Prefix != "" {
+		config.Config.Prefix = secretJSON.Prefix
+	}
 
 	return secretJSON
 }
